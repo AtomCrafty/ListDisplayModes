@@ -28,13 +28,17 @@ namespace ListDisplayModes {
 			Console.WriteLine(" [3] Refresh rate");
 			Console.WriteLine(" [4] Color depth");
 
-			int selection = int.TryParse(Console.ReadLine(), out selection) && selection <= 4 ? selection : 0;
+			int selection = int.TryParse(Console.ReadLine(), out selection) && selection >= 0 && selection <= 4 ? selection : 0;
 			var order = orderFuncs[selection];
 
 			for(int i = 0; ; i++) {
 				var display = DisplayDevice.GetDisplay((DisplayIndex)i);
 				if(display == null) {
-					if(i == 0) WriteLine("No displays found");
+					if(i == 0) {
+						WriteLine("No displays found");
+						Console.ReadLine();
+						return;
+					}
 					break;
 				}
 
@@ -57,7 +61,8 @@ namespace ListDisplayModes {
 				File.WriteAllLines(filename, Log);
 			}
 			catch(IOException e) {
-				Console.WriteLine(e);
+				Console.WriteLine("Failed to save file: " + e.Message);
+				Console.ReadLine();
 			}
 		}
 
