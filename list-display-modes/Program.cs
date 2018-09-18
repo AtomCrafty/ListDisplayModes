@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using OpenTK;
 
 namespace ListDisplayModes {
 	internal static class Program {
+
+		private static readonly List<string> Log = new List<string>();
 
 		private static void Main() {
 
@@ -30,24 +34,40 @@ namespace ListDisplayModes {
 			for(int i = 0; ; i++) {
 				var display = DisplayDevice.GetDisplay((DisplayIndex)i);
 				if(display == null) {
-					if(i == 0) Console.WriteLine("No displays found");
+					if(i == 0) WriteLine("No displays found");
 					break;
 				}
 
-				Console.WriteLine($"---- Display {i}{(display.IsPrimary ? " (Primary)" : "")} ----");
-				Console.WriteLine("Native resolution:");
+				WriteLine($"---- Display {i}{(display.IsPrimary ? " (Primary)" : "")} ----");
+				WriteLine("Native resolution:");
 				PrintDisplayMode(display.Width, display.Height, display.RefreshRate, display.BitsPerPixel);
-				Console.WriteLine("Available resolutions:");
+				WriteLine("Available resolutions:");
 				foreach(var mode in display.AvailableResolutions.OrderByDescending(order)) {
 					PrintDisplayMode(mode.Width, mode.Height, mode.RefreshRate, mode.BitsPerPixel);
 				}
-				Console.WriteLine();
+				WriteLine();
 			}
-			Console.ReadLine();
+
+			Console.WriteLine();
+			Console.WriteLine("Enter file name to save log or leave empty to skip");
+			string filename = Console.ReadLine();
+			if(string.IsNullOrWhiteSpace(filename)) return;
+
+			try {
+				File.WriteAllLines(filename, Log);
+			}
+			catch(IOException e) {
+				Console.WriteLine(e);
+			}
+		}
+
+		private static void WriteLine(string text = "") {
+			Console.WriteLine(text);
+			Log.Add(text);
 		}
 
 		private static void PrintDisplayMode(int width, int height, float refreshRate, int bitsPerPixel) {
-			Console.WriteLine($"    {width}x{height}".PadRight(14) + $"@{refreshRate:f2}Hz".PadRight(10) + $"{bitsPerPixel}bpp");
+			WriteLine($"    {width}x{height}".PadRight(14) + $"@{refreshRate:f2}Hz".PadRight(10) + $"{bitsPerPixel}bpp");
 		}
 	}
 }
